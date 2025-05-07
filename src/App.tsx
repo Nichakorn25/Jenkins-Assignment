@@ -8,7 +8,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload. unging salisa
+          Edit <code>src/App.tsx</code> and save to reload. Unging salisa
         </p>
         <a
           className="App-link"
