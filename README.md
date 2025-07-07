@@ -8,15 +8,16 @@
 - Docker + Docker Compose
 - GitHub (Webhook)
 - VS Code + Dev Tunnels
+
 # 🚧 ขั้นตอนการติดตั้ง
 1️⃣ รัน Jenkins ด้วย Docker Compose
-```bash
 docker login
 docker compose up --build
 - เข้าผ่าน localhost:8080
 - ใช้คำสั่งดึงรหัสแรกเข้า:
 docker exec jenkins cat /var/jenkins-nodejs/secrets/initialAdminPassword
 - ใส่รหัสในหน้า Jenkins → ติดตั้ง Plugin และสร้างผู้ใช้งาน
+  
 2️⃣ ตั้งค่า Jenkins Pipeline
 1.ไปที่ Jenkins dashboard → New Item → ตั้งชื่อ (เช่น Auto-Deploy) → เลือก Pipeline
 2.ไปที่ Configure
@@ -24,6 +25,7 @@ Build Triggers → ติ๊ก GitHub hook trigger for GITScm polling
 Pipeline → Script from SCM
 SCM: Git
 กำหนด Repository URL, Branch, และ Script Path ให้ถูกต้อง
+
 3️⃣ เปิด Jenkins ให้เข้าจากภายนอก (ผ่าน Dev Tunnel)
 บน VS Code:
 
@@ -64,6 +66,7 @@ npm install firebase
     ]
   }
 }
+
 5️⃣ ดึง Firebase Token และใส่ใน Jenkins
 npm install -g firebase-tools
 firebase login
