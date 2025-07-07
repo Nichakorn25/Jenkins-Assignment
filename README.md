@@ -1,46 +1,128 @@
-# Getting Started with Create React App
+🔥 Auto Deployment: React + Firebase + Jenkins + Docker + GitHub + VS Code
+โครงการนี้แสดงการตั้งค่า CI/CD อัตโนมัติ ด้วย Jenkins โดยใช้ Docker, GitHub, Firebase Hosting และ React + TypeScript (TSX)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+🧱 Stack ที่ใช้
+React + TypeScript
+Firebase Hosting
+Jenkins (Pipeline)
+Docker + Docker Compose
+GitHub (Webhook)
+VS Code + Dev Tunnels
+🚧 ขั้นตอนการติดตั้ง
+1️⃣ รัน Jenkins ด้วย Docker Compose
+docker login
+docker compose up --build
+เข้าผ่าน localhost:8080
+ใช้คำสั่งดึงรหัสแรกเข้า:
+docker exec jenkins cat /var/jenkins-nodejs/secrets/initialAdminPassword
+ใส่รหัสในหน้า Jenkins → ติดตั้ง Plugin และสร้างผู้ใช้งาน
+2️⃣ ตั้งค่า Jenkins Pipeline
+ไปที่ Jenkins dashboard → New Item → ตั้งชื่อ (เช่น Auto-Deploy) → เลือก Pipeline
+ไปที่ Configure
+Build Triggers → ติ๊ก GitHub hook trigger for GITScm polling
+Pipeline → Script from SCM
+SCM: Git
+กำหนด Repository URL, Branch, และ Script Path ให้ถูกต้อง
+3️⃣ เปิด Jenkins ให้เข้าจากภายนอก (ผ่าน Dev Tunnel)
+บน VS Code:
 
-## Available Scripts
+เปิด Terminal → คลิก "Port Forward" → Forward พอร์ต 8080
+จะได้ URL เช่น:
+https://f1pik2bs0-8080.asse.devtunnels.ms/
+ใน Jenkins:
 
-In the project directory, you can run:
+ไปที่ Manage Jenkins → System
+ใส่ Jenkins URL ที่ได้ แล้ว Apply & Save
+ใน GitHub:
 
-### `npm start`
+ไปที่ Settings → Webhooks → Add webhook
+URL = <Jenkins URL>/github-webhook/
+เช่น: https://f1pik2bs0-8080.asse.devtunnels.ms/github-webhook/
+4️⃣ สร้าง React Project + Firebase Hosting
+npx create-react-app auto-deploy --template typescript
+cd auto-deploy
+npm install firebase
+ไปที่ Firebase Console
+สร้างโปรเจค + เปิดใช้งาน Hosting
+คัดลอก config มาใส่ใน firebase.tsx
+แก้ไฟล์ firebase.json
+{
+  "hosting": {
+    "public": "dist", // เพิ่ม public
+    "site": "auto-deploy01", //เพิ่ม site
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+5️⃣ ดึง Firebase Token และใส่ใน Jenkins
+npm install -g firebase-tools
+firebase login
+firebase login:ci
+Copy token ที่ได้
+ไปที่ Jenkins → Manage Credentials → (global) → Add Credentials
+Kind: Secret Text
+ID: FIREBASE_TOKEN
+Secret: วาง Token ที่ได้
+🚀 Jenkins Pipeline Script
+pipeline {
+    agent any
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    environment {
+        FIREBASE_PROJECT = 'auto-deploy01'
+    }
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+    stages {
+        stage('Clone') {
+            steps {
+                checkout scm
+            }
+        }
 
-### `npm test`
+        stage('Build') {
+            steps {
+                dir('auto-deploy') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+        stage('Install Firebase CLI') {
+            steps {
+                dir('auto-deploy') {
+                    sh 'npm install firebase-tools'
+                }
+            }
+        }
 
-### `npm run build`
+        stage('Deploy') {
+            steps {
+                withCredentials([string(credentialsId: 'FIREBASE_TOKEN', variable: 'FIREBASE_TOKEN')]) {
+                    dir('auto-deploy') {
+                        sh 'npx firebase deploy --only hosting:$FIREBASE_PROJECT --token $FIREBASE_TOKEN'
+                    }
+                }
+            }
+        }
+    }
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+    post {
+        success {
+            echo 'Deployment succeeded.'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
+🎯 ผลลัพธ์
+ทุกครั้งที่ Push ไปยัง GitHub → GitHub ส่ง Webhook → Jenkins ดึง Code → Build → Deploy ไปยัง Firebase Hosting โดยอัตโนมัติ 🎉
