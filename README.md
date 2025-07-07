@@ -1,14 +1,14 @@
-🔥 Auto Deployment: React + Firebase + Jenkins + Docker + GitHub + VS Code
-โครงการนี้แสดงการตั้งค่า CI/CD อัตโนมัติ ด้วย Jenkins โดยใช้ Docker, GitHub, Firebase Hosting และ React + TypeScript (TSX)
+# 🔥 Auto Deployment: React + Firebase + Jenkins + Docker + GitHub + VS Code
+โปรเจคนี้แสดงการตั้งค่า CI/CD อัตโนมัติ ด้วย Jenkins โดยใช้ Docker, GitHub, Firebase Hosting และ React + TypeScript (TSX)
 
-🧱 Stack ที่ใช้
-React + TypeScript
-Firebase Hosting
-Jenkins (Pipeline)
-Docker + Docker Compose
-GitHub (Webhook)
-VS Code + Dev Tunnels
-🚧 ขั้นตอนการติดตั้ง
+# 🧱 Stack ที่ใช้
+- React + TypeScript
+- Firebase Hosting
+- Jenkins (Pipeline)
+- Docker + Docker Compose
+- GitHub (Webhook)
+- VS Code + Dev Tunnels
+# 🚧 ขั้นตอนการติดตั้ง
 1️⃣ รัน Jenkins ด้วย Docker Compose
 docker login
 docker compose up --build
