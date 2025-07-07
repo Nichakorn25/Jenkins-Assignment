@@ -10,6 +10,7 @@
 - VS Code + Dev Tunnels
 # 🚧 ขั้นตอนการติดตั้ง
 1️⃣ รัน Jenkins ด้วย Docker Compose
+```bash
 docker login
 docker compose up --build
 - เข้าผ่าน localhost:8080
